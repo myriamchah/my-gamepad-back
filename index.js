@@ -1,53 +1,18 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const axios = require("axios");
+const mongoose = require("mongoose");
 
 const app = express();
 app.use(cors());
 
-app.get("/", async (req, res) => {
-  try {
-    const response = await axios.get(
-      `https://api.rawg.io/api/games?key=${process.env.RAWG_KEY}&${req._parsedUrl.query}`
-    );
+mongoose.connect(process.env.MONGODB_URI);
 
-    res.json(response.data);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+const userRoutes = require("./routes/user");
+const gameRoutes = require("./routes/game");
 
-app.get("/games/:gameSlug", async (req, res) => {
-  try {
-    const response = await axios.get(
-      `https://api.rawg.io/api/games/${req.params.gameSlug}?key=${process.env.RAWG_KEY}`
-    );
-
-    const screenshots = await axios.get(
-      `https://api.rawg.io/api/games/${req.params.gameSlug}/screenshots?key=${process.env.RAWG_KEY}`
-    );
-
-    const others = await axios.get(
-      `https://api.rawg.io/api/games/${req.params.gameSlug}/game-series?key=${process.env.RAWG_KEY}`
-    );
-
-    const trailers = await axios.get(
-      `https://api.rawg.io/api/games/${req.params.gameSlug}/movies?key=${process.env.RAWG_KEY}`
-    );
-
-    const trailer = trailers.data.results[0];
-
-    res.json({
-      game: response.data,
-      screenshots: screenshots.data.results,
-      others: others.data.results,
-      trailer: trailer,
-    });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+app.use(userRoutes);
+app.use(gameRoutes);
 
 app.all("*", (req, res) => {
   res.status(404).json({ message: "This route does not exist" });
