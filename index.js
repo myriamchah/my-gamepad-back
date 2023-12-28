@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 
 const app = express();
 app.use(cors());
+app.use(express.json());
 
 mongoose.connect(process.env.MONGODB_URI);
 
