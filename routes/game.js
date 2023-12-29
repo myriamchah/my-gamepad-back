@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
+const isAuthenticated = require("../middlewares/isAuthenticated");
 
 router.get("/", async (req, res) => {
   try {
@@ -42,6 +43,36 @@ router.get("/games/:gameSlug", async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({ message: error.message });
+  }
+});
+
+router.post("/my-collection", isAuthenticated, async (req, res) => {
+  try {
+    const user = req.user;
+    user.games.push(req.body.game);
+    await user.save();
+
+    res.status(200).json({ user });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+router.get("/my-collection", isAuthenticated, async (req, res) => {
+  try {
+    const responses = await Promise.all(
+      req.user.games.map((game) =>
+        axios.get(
+          `https://api.rawg.io/api/games/${game}?key=${process.env.RAWG_KEY}`
+        )
+      )
+    );
+
+    const games = responses.map((response) => response.data);
+
+    res.status(200).json(games);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
