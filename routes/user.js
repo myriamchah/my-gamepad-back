@@ -33,7 +33,7 @@ router.post("/user/signup", async (req, res) => {
       hash,
     });
 
-    res.json({ id: user._id, username: user.username, token: user.token });
+    res.json({ user: user });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -55,8 +55,7 @@ router.post("/user/login", async (req, res) => {
     }
 
     res.json({
-      _id: user._id,
-      token: user.token,
+      user: user,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
