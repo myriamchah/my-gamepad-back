@@ -76,4 +76,20 @@ router.get("/my-collection", isAuthenticated, async (req, res) => {
   }
 });
 
+router.delete("/my-collection/:gameSlug", isAuthenticated, async (req, res) => {
+  try {
+    const user = req.user;
+    const i = user.games.indexOf(req.params.gameSlug);
+    user.games.splice(i, 1);
+
+    await user.save();
+    res.status(200).json({
+      user: user,
+      message: "Game successfully removed from collection",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
